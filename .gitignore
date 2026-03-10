@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-node/
+.turbo/
+data/
+*.db
+*.json.bak
+.env
+.DS_Store
