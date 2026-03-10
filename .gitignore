@@ -6,4 +6,5 @@ data/
 *.db
 *.json.bak
 .env
+*.tsbuildinfo
 .DS_Store
