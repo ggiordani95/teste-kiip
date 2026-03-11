@@ -1,128 +1,118 @@
-# Task Manager - Kiip
+<div align="center">
 
-Aplicacao web de gerenciamento de tarefas para times, construida como um monorepo com Turborepo.
+# Teste Kiip
 
-## Stack Tecnologica
+**Teste Técnico — Desenvolvedor(a) Pleno Full Stack**
 
-| Camada     | Tecnologia                          |
-| ---------- | ----------------------------------- |
-| Monorepo   | Turborepo + npm workspaces          |
-| Backend    | Node.js + Fastify + TypeScript      |
-| Frontend   | React 19 + Vite + TanStack Query    |
-| Validacao  | Zod (schemas compartilhados)        |
-| Persistencia | JSON file (arquivo local)         |
-| Container  | Docker + Docker Compose             |
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Fastify](https://img.shields.io/badge/Fastify-5-000000?logo=fastify&logoColor=white)](https://fastify.dev/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 
-## Como Rodar
+</div>
 
-### Opcao 1: Docker Compose (recomendado)
+---
+
+## Funcionalidades
+
+- Criar tarefas com título, descrição e responsável
+- Visualizar tarefas organizadas em colunas do kanban
+- Atualizar status arrastando entre colunas (drag-and-drop)
+- Editar titulo, descricao e responsavel de tarefas existentes
+- Deletar tarefas
+
+---
+
+## Quick Start
+
+### Docker (recomendado)
+
+**1.** Crie um arquivo `.env` na raiz do projeto:
+
+```env
+# Postgres
+POSTGRES_DB=taskmanager
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+
+# API
+NODE_ENV=production
+API_PORT=3001
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/taskmanager
+FRONTEND_URL=http://localhost:3004
+
+# Web
+NEXT_PUBLIC_API_URL=http://api:3001
+WEB_PORT=3004
+```
+
+**2.** Suba tudo com um comando:
 
 ```bash
 docker compose up --build
 ```
 
-Acesse:
-- **Frontend**: http://localhost:8080
-- **API**: http://localhost:3001/api/tasks
+**3.** Acesse:
 
-### Opcao 2: Desenvolvimento Local
+| Servico  | URL                        |
+|----------|----------------------------|
+| Frontend | http://localhost:3004       |
+| API      | http://localhost:3001       |
+| Postgres | `localhost:5433`           |
 
-Pre-requisitos: Node.js 22+ e npm 10+
+---
+
+### Desenvolvimento local
 
 ```bash
-# Instalar dependencias
-npm install
+# 1. Subir o banco
+docker compose up postgres -d
 
-# Rodar em modo desenvolvimento (API + Frontend simultaneamente)
-npm run dev
+# 2. Configurar variaveis de ambiente
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
 ```
 
-Acesse:
-- **Frontend**: http://localhost:5173
-- **API**: http://localhost:3001/api/tasks
+<details>
+<summary><strong>apps/api/.env</strong></summary>
 
-## Estrutura do Projeto
-
-```
-.
-├── apps/
-│   ├── api/                    # Backend Fastify
-│   │   └── src/
-│   │       ├── controllers/    # Handling de request/response
-│   │       ├── services/       # Logica de negocio + validacao
-│   │       ├── repositories/   # Acesso a dados
-│   │       ├── plugins/        # Plugins Fastify (error handler)
-│   │       ├── routes/         # Definicao de rotas
-│   │       ├── database.ts     # Camada de persistencia JSON
-│   │       └── index.ts        # Entry point
-│   └── web/                    # Frontend React
-│       └── src/
-│           ├── api/            # Fetch wrappers tipados
-│           ├── hooks/          # TanStack Query hooks
-│           ├── components/     # Componentes React
-│           └── styles/         # CSS global
-├── packages/
-│   └── shared/                 # Schemas Zod + tipos TypeScript
-├── docker-compose.yml
-└── turbo.json
+```env
+NODE_ENV=development
+PORT=3001
+DATABASE_URL=postgresql://postgres:postgres@localhost:5433/taskmanager
+FRONTEND_URL=http://localhost:3004
 ```
 
-## API Endpoints
+</details>
 
-| Metodo | Rota              | Descricao                          |
-| ------ | ----------------- | ---------------------------------- |
-| GET    | /api/tasks        | Listar tarefas (filtro por status) |
-| POST   | /api/tasks        | Criar nova tarefa                  |
-| PATCH  | /api/tasks/:id    | Atualizar tarefa                   |
-| DELETE | /api/tasks/:id    | Deletar tarefa                     |
-| GET    | /api/health       | Health check                       |
+<details>
+<summary><strong>apps/web/.env</strong></summary>
 
-**Filtro por status**: `GET /api/tasks?status=pending|in_progress|done`
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
 
-## Decisoes Tecnicas
+</details>
 
-### Por que Turborepo + npm workspaces?
+```bash
+# 3. Instalar dependencias e rodar
+pnpm install
+pnpm dev
+```
 
-Permite compartilhar tipos e schemas entre frontend e backend com type safety de ponta a ponta, sem publicar pacotes. O Turborepo gerencia o pipeline de build com cache e paralelismo.
+---
 
-### Por que JSON file ao inves de banco de dados?
+## Testes
 
-Para um MVP com objetivo de demo, um arquivo JSON oferece:
-- **Zero dependencias externas** -- nao precisa instalar nem configurar banco
-- **Sem compilacao nativa** -- roda em qualquer SO sem build tools (g++, python)
-- **Simplicidade** -- o foco do desafio e arquitetura, nao infraestrutura
+```bash
+pnpm test
+```
 
-O repository pattern abstrai completamente a persistencia. Trocar para PostgreSQL/SQLite no futuro requer mudar apenas a classe `Database` e o `TaskRepository`, sem alterar services, controllers ou frontend.
+Roda todos os testes do monorepo via Turborepo (backend + frontend).
 
-### Por que Fastify?
+---
 
-Fastify e mais rapido que Express, tem suporte nativo a TypeScript, sistema de plugins, e validacao de schema integrada. E um framework moderno com boa DX.
+## Docs
 
-### Por que TanStack Query?
-
-Gerencia cache, refetch automatico, estados de loading/error, e invalidacao de queries pos-mutation. Elimina a necessidade de gerenciamento manual de estado do servidor.
-
-### Arquitetura do Backend
-
-Separacao de responsabilidades em camadas:
-
-- **Routes** -- registra endpoints no Fastify
-- **Controllers** -- extrai dados do request, chama service, formata response
-- **Services** -- validacao com Zod, logica de negocio, lanca erros tipados
-- **Repositories** -- acesso a dados, mapping de campos (snake_case -> camelCase)
-- **Database** -- persistencia em arquivo JSON com leitura/escrita atomica
-
-### Validacao compartilhada com Zod
-
-Os schemas Zod vivem no pacote `@task-manager/shared` e sao usados tanto no backend (validacao de requests) quanto no frontend (tipos TypeScript). Isso garante que frontend e backend sempre concordam sobre o formato dos dados.
-
-## O que faria diferente com mais tempo
-
-- **Testes automatizados**: testes unitarios para services/repositories e testes de integracao para os endpoints da API
-- **PostgreSQL/SQLite**: persistencia robusta com migrations versionadas
-- **Paginacao**: para lidar com grande volume de tarefas
-- **Drag and drop**: mover tarefas entre status arrastando cards (Kanban)
-- **Busca e ordenacao**: filtrar por texto e ordenar por diferentes campos
-- **WebSocket/SSE**: atualizacoes em tempo real quando outro usuario modifica tarefas
-- **CI/CD**: pipeline com lint, type check, testes e build automatizado
-- **Rate limiting e logging estruturado**: para producao
+- Todas documentações na pasta `/docs`.
