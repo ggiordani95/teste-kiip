@@ -1,44 +1,41 @@
-# Decisoes Tecnicas
+# Decisoes tecnicas
 
----
+## Por que Ports & Adapters?
 
-## Ports & Adapters no backend
+Queria que os services fossem testaveis sem banco. Com interfaces nos ports, os testes unitarios usam mocks simples e rodam rapido. Tambem deixa facil trocar o banco se precisar — so implementa outro adapter.
 
-Os services dependem de **interfaces (ports)** e nao de implementacoes concretas. Isso permite:
+## Por que um modelo de boards?
 
-- Trocar o banco de dados sem alterar logica de negocio
-- Testes unitarios com mocks dos repositories (sem banco real)
-- Fronteira clara entre dominio e infraestrutura
+O teste pede um gerenciador de tarefas. Poderia ser so uma tabela de tasks com CRUD direto, mas achei que o modelo `board → columns → tasks` mostra melhor como eu penso modelagem. Suportaria multiplos boards e configuracoes de coluna sem mudar nada.
 
-## Modelo de boards
+Sei que pra esse escopo e mais do que precisa. Mas preferi mostrar que sei fazer do que entregar o minimo.
 
-A separacao `board → configuration → tasks` adiciona um nivel de indirecao. Para o escopo do teste e mais do que necessario, mas demonstra modelagem extensivel — suportaria multiplos boards, configuracoes de colunas diferentes e workflows customizados sem refatoracao.
+## Por que kanban e nao uma lista?
 
-## Kanban ao inves de lista simples
+Uma lista com filtro resolvia. Mas o kanban com drag-and-drop e uma interface que eu ja quis fazer direito, e achei que mostrava mais skill de frontend — lidar com estado otimista, reordenacao, animacoes. O codigo fica mais complexo, mas bem organizado.
 
-Uma lista com filtro atenderia os requisitos. O kanban adiciona drag-and-drop e visualizacao por colunas, mostrando capacidade de implementar interacoes mais ricas mantendo o codigo organizado.
+## Zustand + use() ao inves de React Query
 
-## Schemas compartilhados (Zod)
+Comecei com TanStack Query mas decidi simplificar. O Zustand segura o estado do servidor, o `use()` do React 19 cuida do loading com Suspense, e as mutations fazem update otimista direto no store. Menos uma dependencia e menos abstracao.
 
-O pacote `@task-manager/shared` contem os schemas de validacao usados tanto no backend (validacao de input) quanto no frontend (tipos TypeScript). Garante **consistencia entre as camadas** sem duplicacao.
+## Schemas compartilhados
 
-## Status fixos no card
-
-Os status das tasks sao fixos: **A Fazer**, **Em Progresso** e **Terminado**. Sao independentes do nome da coluna — cada coluna mapeia para um status, mas o nome pode ser editado livremente.
+O pacote shared tem os schemas Zod usados nos dois lados. O backend valida input, o frontend infere tipos. Se eu mudo um campo, muda nos dois.
 
 ## Optimistic updates
 
-Mutations de move e update usam optimistic updates com snapshot/rollback. O usuario ve a mudanca instantaneamente enquanto o request acontece em background. Em caso de erro, o estado anterior e restaurado automaticamente.
+Move e update atualizam a UI antes da resposta do servidor. Se der erro, volta pro estado anterior (snapshot/rollback). A UX fica instantanea.
 
----
+## DI manual
+
+Sem framework de DI, sem decorators, sem reflection. Um arquivo `container.ts` que instancia tudo na ordem certa. Mais verboso, mas zero magia.
 
 ## Trade-offs
 
-| Decisao | Beneficio | Custo |
-|---------|-----------|-------|
-| Modelo board/configuration/tasks | Modelagem extensivel, demonstra capacidade | Complexidade extra para um CRUD simples |
-| Optimistic updates | UX instantanea, sem loading | Complexidade no gerenciamento de cache |
-| Ports & Adapters | Testabilidade, desacoplamento | Mais arquivos e indirecao |
-| Kanban com drag-and-drop | UX rica e visual | Mais complexo que uma lista com filtros |
-| Feature folder unica | Organizacao clara | Pode parecer over-engineering para 1 feature |
-| DI container manual | Zero dependencias, controle total | Composicao manual no boot |
+| Decisao | O que ganho | O que pago |
+|---------|------------|------------|
+| Modelo board/columns/tasks | Extensivel, mostra modelagem | Complexidade extra pro escopo |
+| Optimistic updates | UX sem loading | Logica de cache mais chatinha |
+| Ports & Adapters | Testes faceis, desacoplado | Mais arquivos |
+| Kanban + drag-and-drop | Interface rica | Mais codigo que uma lista |
+| DI manual | Sem dependencia, controle total | Composicao na mao |
