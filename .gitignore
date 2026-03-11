@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-node/
+.next/
 .turbo/
 data/
 *.db
@@ -8,3 +9,4 @@ data/
 .env
 *.tsbuildinfo
 .DS_Store
+.pnpm-store/

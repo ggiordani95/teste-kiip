@@ -1,7 +1,11 @@
 node_modules
 dist
+.next
 .turbo
-*.db
 .git
 .gitignore
+.env
+.pnpm-store
+test-results
+*.db
 README.md
