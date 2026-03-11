@@ -17,16 +17,16 @@ export function reorderTaskInCache(
     return data;
   }
 
-  const movingTask = data.tasks.find((task) => task.id === taskId);
+  const movingTask = data.tasks.find((task: Task) => task.id === taskId);
 
   if (!movingTask) {
     return data;
   }
 
   const nextStatus = targetStatus ?? movingTask.status;
-  const remainingTasks = data.tasks.filter((task) => task.id !== taskId);
-  const targetColumnTasks = remainingTasks.filter((task) => task.status === nextStatus);
-  const otherTasks = remainingTasks.filter((task) => task.status !== nextStatus);
+  const remainingTasks = data.tasks.filter((task: Task) => task.id !== taskId);
+  const targetColumnTasks = remainingTasks.filter((task: Task) => task.status === nextStatus);
+  const otherTasks = remainingTasks.filter((task: Task) => task.status !== nextStatus);
   const safeTargetIndex = Math.max(0, Math.min(targetIndex, targetColumnTasks.length));
 
   targetColumnTasks.splice(safeTargetIndex, 0, {
