@@ -19,7 +19,7 @@
 - Criar tarefas com título, descrição e responsável
 - Visualizar tarefas organizadas em colunas do kanban
 - Atualizar status arrastando entre colunas (drag-and-drop)
-- Editar titulo, descricao e responsavel de tarefas existentes
+- Editar título, descrição e responsável de tarefas existentes
 - Deletar tarefas
 
 ---
@@ -28,7 +28,7 @@
 
 ### Docker (recomendado)
 
-**1.** Crie um arquivo `.env` na raiz do projeto:
+**1.** Crie um arquivo `.env` na raíz do projeto:
 
 ```env
 # Postgres
