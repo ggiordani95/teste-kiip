@@ -60,6 +60,7 @@ docker compose up --build
 | Frontend | http://localhost:3004       |
 | API      | http://localhost:3001       |
 | Postgres | `localhost:5433`           |
+| Scalar   | https://localhost:3001/api/docs |
 
 ---
 
