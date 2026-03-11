@@ -1,70 +1,90 @@
-# API
+# API Endpoints
 
-Base: `http://localhost:3001`
+> Base URL: `http://localhost:3001`
+>
+> Documentacao interativa (Scalar): [`http://localhost:3001/api/docs`](http://localhost:3001/api/docs)
 
-Docs interativa (Scalar): `http://localhost:3001/api/docs`
+---
 
 ## Boards
 
-```
-GET  /api/boards                    # lista boards
-GET  /api/boards/:id                # detalhe
-GET  /api/boards/:id/configuration  # colunas e status
-GET  /api/boards/:id/tasks          # tasks (com filtros)
-GET  /api/boards/:id/members        # membros
-```
+| Metodo | Rota | Descricao |
+|--------|------|-----------|
+| `GET` | `/api/boards` | Lista todos os boards |
+| `GET` | `/api/boards/:id` | Detalhe de um board |
+| `GET` | `/api/boards/:id/configuration` | Colunas e mapeamento de status |
+| `GET` | `/api/boards/:id/tasks` | Tasks do board (filtros opcionais) |
+| `GET` | `/api/boards/:id/members` | Membros do board |
 
-Filtros na listagem de tasks:
+### Query params para listagem de tasks
 
-- `status` — pending, in_progress, done
-- `assignee` — busca parcial pelo nome
-- `query` — busca em titulo e descricao
-- `startAt` — offset (default 0)
-- `maxResults` — limite (default 50, max 100)
+| Param | Tipo | Descricao |
+|-------|------|-----------|
+| `status` | `string` | Filtrar por status (`pending`, `in_progress`, `done`) |
+| `assignee` | `string` | Filtrar por responsável (busca parcial) |
+| `query` | `string` | Busca em titulo e descricao |
+| `startAt` | `number` | Offset para paginacao (default: `0`) |
+| `maxResults` | `number` | Limite de resultados (default: `50`, max: `100`) |
+
+---
 
 ## Tasks
 
-```
-POST   /api/tasks           # criar
-GET    /api/tasks/:id        # detalhe
-PUT    /api/tasks/:id        # atualizar (titulo, descricao, responsavel)
-PUT    /api/tasks/:id/move   # mover entre colunas
-DELETE /api/tasks/:id        # deletar
-```
+| Metodo | Rota | Descricao |
+|--------|------|-----------|
+| `POST` | `/api/tasks` | Criar task |
+| `GET` | `/api/tasks/:id` | Detalhe da task |
+| `PUT` | `/api/tasks/:id` | Atualizar titulo, descricao ou responsável |
+| `PUT` | `/api/tasks/:id/move` | Mover entre colunas |
+| `DELETE` | `/api/tasks/:id` | Remover task |
+
+---
 
 ## Exemplos
 
-Criar:
+### Criar task
 
 ```bash
 curl -X POST http://localhost:3001/api/tasks \
   -H "Content-Type: application/json" \
-  -d '{"boardId": 1, "title": "Implementar login", "assignee": "Ana Silva"}'
+  -d '{
+    "boardId": 1,
+    "title": "Implementar login",
+    "description": "Adicionar autenticacao com JWT",
+    "assignee": "Ana Silva"
+  }'
 ```
 
-Filtrar por status:
+### Listar tasks filtradas por status
 
 ```bash
 curl "http://localhost:3001/api/boards/1/tasks?status=pending"
 ```
 
-Atualizar:
+### Atualizar task
 
 ```bash
 curl -X PUT http://localhost:3001/api/tasks/1 \
   -H "Content-Type: application/json" \
-  -d '{"title": "Login com OAuth", "assignee": "Carlos Souza"}'
+  -d '{
+    "title": "Implementar login com OAuth",
+    "assignee": "Carlos Souza"
+  }'
 ```
 
-Mover:
+### Mover task para outra coluna
 
 ```bash
 curl -X PUT http://localhost:3001/api/tasks/1/move \
   -H "Content-Type: application/json" \
-  -d '{"columnId": 2, "targetIndex": 0, "status": "in_progress"}'
+  -d '{
+    "columnId": 2,
+    "targetIndex": 0,
+    "status": "in_progress"
+  }'
 ```
 
-Deletar:
+### Deletar task
 
 ```bash
 curl -X DELETE http://localhost:3001/api/tasks/1

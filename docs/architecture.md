@@ -1,68 +1,89 @@
 # Arquitetura
 
-Monorepo com 3 pacotes (Turborepo + pnpm):
+## Visao geral
+
+O projeto e um monorepo com 3 pacotes gerenciados por Turborepo + pnpm workspaces:
 
 ```
-packages/shared   →  Schemas Zod + tipos (usado por api e web)
-apps/api          →  Backend Fastify + PostgreSQL
-apps/web          →  Frontend Next.js 15 + React 19
+packages/shared   →   Schemas Zod + tipos (usado por api e web)
+apps/api          →   Backend Node.js + Fastify + PostgreSQL
+apps/web          →   Frontend Next.js 15 + React 19
 ```
 
-## Backend
+---
 
-Segue Ports & Adapters. A ideia: o dominio nao conhece Fastify nem PostgreSQL.
+## Backend — Ports & Adapters
+
+O backend segue o padrao Ports & Adapters (Hexagonal Architecture), separando dominio de infraestrutura:
 
 ```
 apps/api/src/
-├── config/              # env vars validadas com Zod
+├── config/                 # Variaveis de ambiente (validadas com Zod)
 ├── domain/
-│   ├── ports/           # interfaces dos repositories
-│   ├── services/        # logica de negocio
-│   └── errors/          # NotFound, Validation
+│   ├── ports/              # Interfaces dos repositories
+│   ├── services/           # Logica de negocio
+│   ├── errors/             # Erros de dominio (NotFound, Validation)
+│   └── validate.ts         # Validacao generica com Zod
 ├── application/
-│   ├── controllers/     # recebem/retornam objetos puros, sem Request/Reply
-│   └── dtos/            # tipos de entrada/saida dos controllers
+│   └── controllers/        # Handlers puros (sem dependencia do Fastify)
 ├── infrastructure/
-│   ├── database/        # pool, migrations, transactions
-│   ├── repositories/    # implementacoes PostgreSQL
-│   └── http/            # routes Fastify, plugins, Scalar docs
-└── di/                  # composition root (DI manual, sem framework)
+│   ├── database/           # Pool, migrations, transactions
+│   ├── repositories/       # Implementacoes PostgreSQL dos ports
+│   └── http/               # Routes, plugins, helpers (adapter Fastify)
+└── di/                     # Composition root — DI container manual
 ```
 
-Controllers nao importam nada do Fastify. As routes fazem a ponte — pegam params/body do request, chamam o controller, e devolvem o resultado.
+### Principios
 
-Repositories sao interfaces no `domain/ports/`. O DI container conecta tudo no boot.
+- **Controllers desacoplados do framework** — recebem/retornam objetos puros, sem `Request`/`Reply` do Fastify
+- **Repositories como ports** — interfaces definidas no domain, implementacoes no infrastructure
+- **DI container manual** — composicao no boot sem decorators, reflection ou frameworks de DI
+- **Migrations sequenciais** — arquivos SQL em `migrations/`, executados em ordem e registrados em `schema_migrations`
 
-Migrations sao SQL puro em `migrations/`. Rodam em ordem e ficam registradas em `schema_migrations`.
+---
 
-## Frontend
+## Frontend — Feature folder
 
 ```
 apps/web/src/
-├── app/                     # App Router (layout, page)
-├── lib/                     # http client
-├── components/              # Avatar, Modal, Select
-└── features/tasks/
-    ├── components/          # KanbanBoard, KanbanColumn, TaskCard, TaskFormPanel
-    ├── hooks/               # useBoards, useTaskMutations, useDragAndDrop, useTaskForm
-    ├── config/              # cores, icones, formatacao de datas
-    ├── stores/              # Zustand (board ativo + dados do servidor)
-    ├── pages/               # KanbanPage
-    ├── api/                 # chamadas HTTP tipadas
-    └── utils/               # agrupamento por coluna, reordenacao de cache
+├── app/                        # Next.js App Router (layout, page, providers)
+├── lib/                        # Utilitarios compartilhados (http client)
+├── components/                 # Componentes reutilizaveis
+│   ├── Avatar.tsx
+│   ├── Modal/
+│   │   ├── Modal.tsx
+│   │   └── hooks/useModal.ts
+│   └── Select/
+│       ├── Select.tsx
+│       └── hooks/useDropdown.ts
+└── features/tasks/             # Feature principal
+    ├── components/             # KanbanBoard, KanbanColumn, TaskCard, Modals
+    ├── hooks/                  # useTaskMutations, useColumnMutations, useDragAndDrop
+    ├── config/                 # Constantes visuais (cores, icones, status)
+    ├── stores/                 # Estado local (active board — Zustand)
+    ├── pages/                  # KanbanPage (composicao da tela)
+    ├── tasks.api.ts            # Chamadas HTTP tipadas
+    ├── query-keys.ts           # Factory de query keys (TanStack Query)
+    ├── task-cache.ts           # Helpers para optimistic updates
+    └── group-tasks.ts          # Agrupamento de tasks por coluna
 ```
 
-Estado do servidor fica no Zustand. O carregamento inicial usa `use()` do React 19 com `<Suspense>` — sem useEffect pra fetch.
+### Principios
 
-Mutations fazem update otimista no store, chamam a API, e fazem refetch em background pra reconciliar. Se der erro, restaura o snapshot anterior.
+- **Custom hooks** separando logica de UI em cada componente
+- **Optimistic updates** com snapshot/rollback nas mutations de move e update
+- **Drag-and-drop** com `@hello-pangea/dnd`
+- **Componentes reutilizaveis** extraidos quando ha reuso real entre features
 
-## Shared
+---
+
+## Shared — Schemas compartilhados
 
 ```
 packages/shared/src/
-├── schemas.ts    # Zod (task, board, member, column)
-├── types.ts      # tipos inferidos dos schemas
-└── index.ts      # re-exports
+├── schemas.ts    # Schemas Zod (task, board, member, column)
+├── types.ts      # Tipos TypeScript inferidos dos schemas
+└── index.ts      # Barrel exports
 ```
 
-Usado nos dois lados. Backend valida input com `.parse()`, frontend usa os tipos pra tipar props e API calls.
+O pacote `@task-manager/shared` e usado tanto no backend (validacao de input) quanto no frontend (tipos TypeScript). Garante **consistencia entre as camadas** sem duplicacao de definicoes.
