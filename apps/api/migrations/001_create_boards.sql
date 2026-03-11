@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS boards (
+  id SERIAL PRIMARY KEY,
+  key VARCHAR(20) NOT NULL UNIQUE,
+  name VARCHAR(120) NOT NULL,
+  type VARCHAR(20) NOT NULL DEFAULT 'kanban',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO boards (key, name, type)
+SELECT 'KAN', 'Exemplo de Board', 'kanban'
+WHERE NOT EXISTS (SELECT 1 FROM boards WHERE key = 'KAN');
