@@ -8,7 +8,7 @@ import { useBoardStore } from "../stores";
 
 function LoadingScreen({ message }: { message: string }) {
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="flex h-screen w-full items-center justify-center">
       <p className="text-sm text-text-muted">{message}</p>
     </div>
   );
