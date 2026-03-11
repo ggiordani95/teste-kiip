@@ -17,7 +17,7 @@ export {
   updateTaskSchema,
   TASK_STATUSES,
   taskStatusSchema,
-} from "./schemas";
+} from "./schemas.js";
 
 export type {
   Board,
@@ -34,4 +34,4 @@ export type {
   MoveTaskInput,
   UpdateTaskInput,
   TaskStatus,
-} from "./types";
+} from "./types.js";

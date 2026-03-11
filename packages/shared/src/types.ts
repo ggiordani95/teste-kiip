@@ -14,7 +14,7 @@ import type {
   moveTaskSchema,
   updateTaskSchema,
   taskStatusSchema,
-} from "./schemas";
+} from "./schemas.js";
 
 export type TaskStatus = z.infer<typeof taskStatusSchema>;
 

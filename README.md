@@ -40,11 +40,11 @@ POSTGRES_PASSWORD=postgres
 NODE_ENV=production
 API_PORT=3001
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/taskmanager
-FRONTEND_URL=http://localhost:3004
+FRONTEND_URL=http://localhost:3000
 
 # Web
 NEXT_PUBLIC_API_URL=http://api:3001
-WEB_PORT=3004
+WEB_PORT=3000
 ```
 
 **2.** Suba tudo com um comando:
@@ -57,7 +57,7 @@ docker compose up --build
 
 | Servico  | URL                        |
 |----------|----------------------------|
-| Frontend | http://localhost:3004       |
+| Frontend | http://localhost:3000       |
 | API      | http://localhost:3001       |
 | Postgres | `localhost:5433`           |
 | Scalar   | https://localhost:3001/api/docs |
@@ -82,7 +82,7 @@ cp apps/web/.env.example apps/web/.env
 NODE_ENV=development
 PORT=3001
 DATABASE_URL=postgresql://postgres:postgres@localhost:5433/taskmanager
-FRONTEND_URL=http://localhost:3004
+FRONTEND_URL=http://localhost:3000
 ```
 
 </details>

@@ -5,7 +5,7 @@ import { env } from "../../../config/env";
 export async function registerCors(app: FastifyInstance): Promise<void> {
   const allowedOrigins = new Set([
     env.frontendUrl,
-    "http://127.0.0.1:3004",
+    "http://127.0.0.1:3000",
   ]);
 
   await app.register(cors, {

@@ -9,7 +9,7 @@
 |--------|-------|
 | Framework | Playwright 1.58 |
 | Browser | Chromium |
-| Base URL | `http://127.0.0.1:3004` |
+| Base URL | `http://127.0.0.1:3000` |
 | API URL | `http://127.0.0.1:3001` |
 | Arquivo | `apps/web/tests/e2e/kanban.spec.ts` |
 | Config | `apps/web/playwright.config.ts` |
