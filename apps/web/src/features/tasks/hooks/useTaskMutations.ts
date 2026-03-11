@@ -8,6 +8,7 @@ import type {
   TaskStatus,
   UpdateTaskInput,
 } from "@task-manager/shared";
+import { showErrorToast } from "@/components/Toast";
 import * as tasksApi from "../api/tasks.api";
 import { reorderTaskInCache } from "../utils/task-cache";
 import { useBoardStore } from "../stores";
@@ -31,6 +32,7 @@ export function useCreateTask() {
         return task;
       } catch (err) {
         setError(err as Error);
+        showErrorToast("Erro ao criar tarefa.");
         throw err;
       } finally {
         setIsPending(false);
@@ -70,6 +72,7 @@ export function useUpdateTask(boardId?: number) {
         setTasks(() => snapshot);
         refetchTasks(boardId);
         setError(err as Error);
+        showErrorToast("Erro ao atualizar tarefa.");
         throw err;
       } finally {
         setIsPending(false);
@@ -117,6 +120,7 @@ export function useMoveTask(boardId?: number) {
           useBoardStore.setState({ tasksResponse: snapshot });
         }
         refetchTasks(boardId);
+        showErrorToast("Erro ao mover tarefa.");
       } finally {
         setIsPending(false);
       }
@@ -151,6 +155,7 @@ export function useDeleteTask(boardId?: number) {
         .catch(() => {
           setTasks(() => snapshot);
           refetchTasks(boardId);
+          showErrorToast("Erro ao excluir tarefa.");
         })
         .finally(() => setIsPending(false));
     },
